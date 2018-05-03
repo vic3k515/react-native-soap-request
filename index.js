@@ -16,7 +16,7 @@ class SoapRequest {
     if (props.targetNamespace) {
       this.targetNamespace = props.targetNamespace
     }
-      
+
     if (props.commonTypes) {
       this.commonTypes = props.commonTypes;
     }
@@ -25,20 +25,24 @@ class SoapRequest {
       this.requestURL = props.requestURL;
     }
 
+    if (props.elemNameForArrayItem) {
+      this.elemNameForArrayItem = props.elemNameForArrayItem;
+    }
+
     this.xmlRequest = null;
     this.xmlResponse = null;
     this.responseDoc = null;
   }
 
   createRequest(request) {
-    this.xmlDoc = new DOMParser().parseFromString('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"></soap:Envelope>'); 
+    this.xmlDoc = new DOMParser().parseFromString('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"></soap:Envelope>');
     this.rootElement = this.xmlDoc.documentElement;
 
     if (this.targetNamespace) {
       this.rootElement.setAttribute('xmlns:ch0', this.targetNamespace);
       this.rootElement.setAttribute('xmlns:tns', this.targetNamespace);
     }
-      
+
     if (this.commonTypes) {
       this.rootElement.setAttribute('xmlns:ch1', this.commonTypes);
       this.rootElement.setAttribute('xmlns:cmn', this.commonTypes);
@@ -49,11 +53,11 @@ class SoapRequest {
     // Build request body
     const bodyElement = this.appendChild(this.rootElement, 'soap:Body');
 
-    this.eachRecursive(request, bodyElement); 
+    this.eachRecursive(request, bodyElement);
 
 
     //-------------------
- 
+
     const xmlSerializer = new XMLSerializer();
     const xmlOutput = xmlSerializer.serializeToString(this.xmlDoc);
     this.xmlRequest = xmlHeader + xmlOutput;
@@ -63,7 +67,7 @@ class SoapRequest {
   eachRecursive(obj, parentElement)
   {
     let elementName = Object.keys(obj)[0];
-    let currentElement = parentElement; 
+    let currentElement = parentElement;
 
     for (var k in obj)
     {
@@ -77,7 +81,8 @@ class SoapRequest {
           }
           delete obj[k].attributes;
         }
-        this.eachRecursive(obj[k], this.appendChild(currentElement, k));
+        let childName = (obj instanceof Array && this.elemNameForArrayItem ) ? this.elemNameForArrayItem : k;
+        this.eachRecursive(obj[k], this.appendChild(currentElement, childName));
       }
       else {
         let text = obj[k];
@@ -142,7 +147,7 @@ class SoapRequest {
 
       this.xmlResponse = await response.text();
       console.log('xmlResponse', this.xmlResponse);
-      
+
       // Beware this relies on sync callback behaviour which apparently could change in future versions of react-native-xml2js
       parseString(this.xmlResponse, (err, result) => {
         if (err) {
