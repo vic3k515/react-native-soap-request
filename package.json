@@ -6,6 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "react-native-xml2js": "^1.0.3",
+    "moment": "^2.22.1",
+    "xmldom": "^0.1.27"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adamski/react-native-soap-request.git"
