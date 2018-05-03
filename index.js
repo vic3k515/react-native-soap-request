@@ -74,6 +74,8 @@ class SoapRequest {
       if (!obj.hasOwnProperty(k))
         continue;       // skip this property
 
+      let childName = (obj instanceof Array && this.elemNameForArrayItem ) ? this.elemNameForArrayItem : k;
+
       if (typeof obj[k] == "object" && obj[k] !== null) {
         if (Object.keys(obj[k]).find(x => x == 'attributes')) {
           for (var attr in obj[k].attributes) {
@@ -81,12 +83,12 @@ class SoapRequest {
           }
           delete obj[k].attributes;
         }
-        let childName = (obj instanceof Array && this.elemNameForArrayItem ) ? this.elemNameForArrayItem : k;
+
         this.eachRecursive(obj[k], this.appendChild(currentElement, childName));
       }
       else {
         let text = obj[k];
-        this.appendChild(currentElement, k, text);
+        this.appendChild(currentElement, childName, text);
       }
     }
   }
